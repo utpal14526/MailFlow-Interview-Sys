@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
-
-const SECRET = "Utpal_Secret";
+import dotenv from "dotenv";
+dotenv.config();
 
 export function generateToken(payload) {
-  console.log(SECRET);
-  return jwt.sign(payload, SECRET, { expiresIn: "1d" });
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 }
 
 export function verifyToken(token) {
