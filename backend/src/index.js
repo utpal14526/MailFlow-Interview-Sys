@@ -18,7 +18,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/campaign", campaignRoutes);
 
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
@@ -29,4 +29,3 @@ app.listen(PORT, () => {
 // LogIn prr click se go to Start of login
 // Updation in existing campaign
 // while selecting campaigns , select all emails option -- Implemented
-
