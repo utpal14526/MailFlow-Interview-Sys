@@ -5,59 +5,59 @@ import { Trash2 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Contact = () => {
+function Contact() {
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
   const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
 
-  const fetchContacts = async () => {
+  async function fetchContacts() {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await axios.get(`${BASE_URL}/api/contact`, {
+      const response = await axios.get(`${BASE_URL}/api/contact`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setContacts(res?.data?.contacts);
-    } catch (err) {
-      console.error("Error fetching contacts:", err);
+      setContacts(
+        response && response.data && response.data.contacts
+          ? response.data.contacts
+          : []
+      );
+    } catch (error) {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleAddContact = async (e) => {
+  async function handleAddContact(e) {
     e.preventDefault();
     try {
-      const res = await axios.post(`${BASE_URL}/api/contact`, newContact, {
+      const response = await axios.post(`${BASE_URL}/api/contact`, newContact, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success("Contact added successfully!");
-      setContacts((prev) => [res?.data.contact, ...prev]);
+      toast.success("Contact added!");
+      setContacts((prev) => [response.data.contact, ...prev]);
       setNewContact({ name: "", email: "" });
-    } catch (err) {
-      toast.error("Failed to add contact. Please try again.");
-      console.error("Error adding contact:", err);
+    } catch (error) {
+      toast.error("Could not add contact. Please try again.");
     }
-  };
+  }
 
-  const handleDelete = async (id) => {
+  async function handleDelete(id) {
     try {
       await axios.delete(`${BASE_URL}/api/contact/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setContacts((prev) => prev.filter((c) => c._id !== id));
-      toast.success("Contact deleted successfully!");
-    } catch (err) {
-      toast.error("Failed to delete contact. Please try again.");
-      console.error("Error deleting contact:", err);
+      toast.success("Contact removed.");
+    } catch (error) {
+      toast.error("Could not delete contact. Please try again.");
     }
-  };
+  }
 
   useEffect(() => {
     fetchContacts();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -65,7 +65,6 @@ const Contact = () => {
       <ToastContainer />
       <div className="contact-container">
         <h1>Contact List</h1>
-
         <form className="contact-form" onSubmit={handleAddContact}>
           <input
             type="text"
@@ -87,7 +86,6 @@ const Contact = () => {
           />
           <button type="submit">Add Contact</button>
         </form>
-
         {loading ? (
           <p>Loading contacts...</p>
         ) : (
@@ -98,7 +96,10 @@ const Contact = () => {
                   <strong>{contact.name}</strong>
                   <p>{contact.email}</p>
                   <small>
-                    Created: {new Date(contact.createdAt).toLocaleString()}
+                    Created:{" "}
+                    {contact.createdAt
+                      ? new Date(contact.createdAt).toLocaleString()
+                      : ""}
                   </small>
                 </div>
                 <button
@@ -114,6 +115,6 @@ const Contact = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Contact;

@@ -5,7 +5,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Login = () => {
+function Login() {
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,14 +19,14 @@ const Login = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  async function handleLogin(e) {
     e.preventDefault();
     try {
       const res = await axios.post(`${BASE_URL}/api/auth/login`, {
         email,
         password,
       });
-      if (res?.data?.token) {
+      if (res && res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
         toast.success(res.data.message || "Login successful!", {
           autoClose: 3000,
@@ -34,13 +34,13 @@ const Login = () => {
         setTimeout(() => navigate("/"), 1000);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed", {
+      toast.error(err?.response?.data?.message || "Login failed", {
         autoClose: 3000,
       });
     }
-  };
+  }
 
-  const handleForgotPassword = async (e) => {
+  async function handleForgotPassword(e) {
     e.preventDefault();
     try {
       await axios.post(`${BASE_URL}/api/auth/forgot-password`, { email });
@@ -59,9 +59,9 @@ const Login = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Error sending OTP");
     }
-  };
+  }
 
-  const handleVerifyOtp = async (e) => {
+  async function handleVerifyOtp(e) {
     e.preventDefault();
     try {
       await axios.post(`${BASE_URL}/api/auth/verify-otp`, { email, otp });
@@ -70,9 +70,9 @@ const Login = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid OTP");
     }
-  };
+  }
 
-  const handleResetPassword = async (e) => {
+  async function handleResetPassword(e) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error("Passwords do not match");
@@ -98,7 +98,7 @@ const Login = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to reset password");
     }
-  };
+  }
 
   return (
     <div className="login-container">
@@ -283,6 +283,6 @@ const Login = () => {
       )}
     </div>
   );
-};
+}
 
 export default Login;

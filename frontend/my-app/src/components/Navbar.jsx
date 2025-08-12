@@ -1,8 +1,6 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-
 
 function Navbar() {
   const navigate = useNavigate();

@@ -11,9 +11,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import Color from "@tiptap/extension-color";
 
-const MenuBar = ({ editor }) => {
+function MenuBar({ editor }) {
   if (!editor) return null;
-
   return (
     <div className="flex gap-2 mb-2 border-b pb-2">
       <button
@@ -50,9 +49,9 @@ const MenuBar = ({ editor }) => {
       />
     </div>
   );
-};
+}
 
-const Dashboard = () => {
+function Dashboard() {
   const [stats, setStats] = useState({
     totalCampaignsCount: 0,
     sentCampaignsCount: 0,
@@ -74,52 +73,55 @@ const Dashboard = () => {
     content: "",
   });
 
-  const fetchStats = async () => {
+  async function fetchStats() {
     try {
       const res = await axios.get(`${BASE_URL}/api/campaign/getDashBoardData`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setStats(res?.data?.stats);
-    } catch {}
-  };
+      setStats(res && res.data && res.data.stats ? res.data.stats : stats);
+    } catch (error) {}
+  }
 
-  const fetchCampaigns = async () => {
+  async function fetchCampaigns() {
     try {
       const res = await axios.get(
         `${BASE_URL}/api/campaign?status=${statusFilter}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCampaigns(res?.data?.campaigns);
-    } catch {}
-  };
+      setCampaigns(
+        res && res.data && res.data.campaigns ? res.data.campaigns : []
+      );
+    } catch (error) {}
+  }
 
-  const handleDelete = async (id) => {
+  async function handleDelete(id) {
     try {
       await axios.delete(`${BASE_URL}/api/campaign/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCampaigns();
-      toast.success("Campaign deleted successfully!");
+      toast.success("Campaign deleted.");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete campaign");
+      toast.error(err?.response?.data?.message || "Failed to delete campaign");
     }
-  };
+  }
 
-  const fetchContacts = async () => {
+  async function fetchContacts() {
     try {
       const res = await axios.get(`${BASE_URL}/api/contact`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setContacts(res?.data?.contacts);
+      setContacts(
+        res && res.data && res.data.contacts ? res.data.contacts : []
+      );
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to fetch contacts");
+      toast.error(err?.response?.data?.message || "Failed to fetch contacts");
       setContacts([]);
     }
-  };
+  }
 
-  const handleSendCampaign = async (campaignId) => {
+  async function handleSendCampaign(campaignId) {
     setCampaigns((prev) => prev.filter((c) => c._id !== campaignId));
-
     try {
       await axios.post(
         `${BASE_URL}/api/campaign/send/${campaignId}`,
@@ -127,21 +129,20 @@ const Dashboard = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.info("Campaign moved to in-progress");
-
       if (statusFilter === "in-progress") {
         fetchCampaigns();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to start sending");
+      toast.error(error?.response?.data?.message || "Failed to start sending");
       fetchCampaigns();
     }
-  };
+  }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchStats();
     fetchCampaigns();
     fetchContacts();
+    // eslint-disable-next-line
   }, [statusFilter]);
 
   return (
@@ -200,12 +201,12 @@ const Dashboard = () => {
                     { subject, body, name, taggedContacts: selectedContacts },
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
-                  toast.success("Campaign created successfully");
+                  toast.success("Campaign created.");
                   setCreateCampaign(false);
                   fetchCampaigns();
                 } catch (err) {
                   toast.error(
-                    err.response?.data?.message || "Failed to create campaign"
+                    err?.response?.data?.message || "Failed to create campaign"
                   );
                 }
               }}
@@ -361,6 +362,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Dashboard;

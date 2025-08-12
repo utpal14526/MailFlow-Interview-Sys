@@ -4,25 +4,24 @@ import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
 import DashBoard from "../assests/DashBoard.png";
 
-const Home = () => {
-  const token = localStorage.getItem("token");
-
+function Home() {
   return (
     <div className="home-container">
       <section className="hero-section">
         <div className="hero-text">
           <h1>
-            Elevate Your Email <br /> Marketing with <span>MailFlow</span>
+            Take Your Email <br /> Marketing Further with <span>MailFlow</span>
           </h1>
           <p>
-            Introducing MailFlow, the unsung hero of streamlined communication
-            in the world of Software as a Service.
+            MailFlow helps you keep your messages organized and your audience
+            engaged. Simple, fast, and made for teams who want to get things
+            done.
           </p>
 
           <div className="hero-buttons">
             <Link to="/dashboard">
               <button className="btn contacts-btn flex items-center gap-2">
-                <span>Go to DashBoard</span>
+                <span>Go to Dashboard</span>
                 <MoveRight className="w-4 h-4" />
               </button>
             </Link>
@@ -35,6 +34,6 @@ const Home = () => {
       </section>
     </div>
   );
-};
+}
 
 export default Home;

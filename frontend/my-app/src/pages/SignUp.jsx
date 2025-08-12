@@ -5,8 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const SignUp = () => {
+function SignUp() {
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -14,44 +15,39 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleChange = (e) => {
+  function handleChange(e) {
     setFormData((prev) => ({
       ...prev,
       [e.target.id]: e.target.value,
     }));
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-
     const { name, email, password, confirmPassword } = formData;
-
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
     try {
-      const res = await axios.post("http://localhost:5002/api/auth/register", {
+      const res = await axios.post(`${BASE_URL}/api/auth/register`, {
         name,
         email,
         password,
         confirmPassword,
       });
-
-      if (res?.data?.token) {
+      if (res && res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
         toast.success(res.data.message || "Registration successful!");
         setTimeout(() => navigate("/"), 2000);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(err?.response?.data?.message || "Something went wrong");
     }
-  };
+  }
 
   return (
     <div className="signup-container">
@@ -133,6 +129,6 @@ const SignUp = () => {
       </form>
     </div>
   );
-};
+}
 
 export default SignUp;

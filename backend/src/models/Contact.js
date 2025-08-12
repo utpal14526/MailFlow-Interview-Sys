@@ -21,6 +21,5 @@ const contactSchema = new mongoose.Schema(
 );
 
 contactSchema.index({ owner: 1, email: 1 }, { unique: true });
-// to avOid duplicate contacts for the same user unique
 
 export const Contact = mongoose.model("Contact", contactSchema);

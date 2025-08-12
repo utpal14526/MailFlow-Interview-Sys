@@ -1,20 +1,20 @@
 .contact-page {
-  background-color: #673de6;
+  background: #673de6;
   min-height: 100vh;
-  padding: 3rem 1rem;
+  padding: 48px 12px;
   display: flex;
   justify-content: center;
-  color: white;
+  color: #fff;
 }
 
 .contact-container {
   max-width: 600px;
   width: 100%;
-  background: white;
+  background: #fff;
   padding: 2rem;
   border-radius: 12px;
   color: #333;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
 .contact-container h1 {
@@ -25,8 +25,8 @@
 
 .contact-form {
   display: flex;
-  gap: 1rem;
   flex-direction: column;
+  gap: 16px;
   margin-bottom: 2rem;
 }
 
@@ -40,16 +40,16 @@
 .contact-form button {
   padding: 0.7rem;
   font-size: 1rem;
-  background-color: #673de6;
-  color: white;
+  background: #673de6;
+  color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .contact-form button:hover {
-  background-color: #5a2dd8;
+  background: #5a2dd8;
 }
 
 .contact-list {
@@ -75,6 +75,6 @@
   background: none;
   border: none;
   font-size: 1.2rem;
-  color: red;
+  color: #e53935;
   cursor: pointer;
 }
