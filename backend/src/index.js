@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import dbConnection from "./common/config/database-connection.js";
+import campaignRoutes from "./routes/campaign.route.js";
 
 dotenv.config();
 
@@ -15,8 +16,17 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/campaign", campaignRoutes);
 
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Protected route feature -- Implemented
+// Mail send feature like gmail   -- Implemented
+// Campaign email sending (new status)
+// LogIn prr click se go to Start of login
+// Updation in existing campaign
+// while selecting campaigns , select all emails option -- Implemented
+

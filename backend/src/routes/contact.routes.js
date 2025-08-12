@@ -1,4 +1,3 @@
-// routes/contact.routes.js
 import { Router } from "express";
 import {
   getAllContacts,
@@ -14,7 +13,3 @@ router.post("/", authenticate, addContact);
 router.delete("/:contactId", authenticate, deleteContact);
 
 export default router;
-
-// in contacts for user getAll contacts
-// for user add a contact in their list
-// for user delete a contact from their list

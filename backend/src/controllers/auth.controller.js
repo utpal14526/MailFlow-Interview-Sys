@@ -1,4 +1,10 @@
-import { loginService, registerService } from "../services/auth.service.js";
+import {
+  loginService,
+  registerService,
+  forgotPasswordService,
+  verifyOtpService,
+  resetPasswordService,
+} from "../services/auth.service.js";
 
 export const login = async (req, res) => {
   try {
@@ -11,9 +17,11 @@ export const login = async (req, res) => {
       message: "Login successful",
     });
   } catch (error) {
-    res
-      .status(401)
-      .json({ error: error.message, success: false, message: "Login failed" });
+    res.status(401).json({
+      error: error.message,
+      success: false,
+      message: "Login failed",
+    });
   }
 };
 
@@ -32,6 +40,74 @@ export const register = async (req, res) => {
       error: error.message,
       success: false,
       message: "Registration failed",
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await forgotPasswordService(email);
+    res.status(200).json({
+      success: true,
+      message: "OTP sent to your email address",
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message,
+      success: false,
+      message: "Failed to send OTP",
+    });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    await verifyOtpService(email, otp);
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message,
+      success: false,
+      message: "OTP verification failed",
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword, confirmPassword } = req.body;
+
+    await resetPasswordService(email, newPassword, confirmPassword);
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful. Please log in.",
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message,
+      success: false,
+      message: "Password reset failed",
+    });
+  }
+};
+
+export const verifyUser = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: "User verified successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error.message,
+      success: false,
+      message: "User verification failed",
     });
   }
 };

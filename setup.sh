@@ -251,3 +251,4 @@ EOF
 chmod +x setup.sh
 
 echo "✅ Setup script created successfully!"
+

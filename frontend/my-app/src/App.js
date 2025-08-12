@@ -6,6 +6,9 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Contact from "./pages/Contact";
+import DashBoard from "./pages/DashBoard";
+import ProtectedRoute from "./ProtectedRoute/ProtectedRoute.js";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -15,8 +18,25 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/contact" element={<Contact />} />
+
+        <Route
+          path="/contact"
+          element={
+            <ProtectedRoute>
+              <Contact />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashBoard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+      <Footer />
     </>
   );
 }

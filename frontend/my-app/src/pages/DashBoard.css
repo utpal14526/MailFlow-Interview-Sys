@@ -1,0 +1,20 @@
+.stat-card {
+  background-color: #673de6;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background-color: #eee;
+  color: #333;
+}
+
+.tab-btn.active {
+  background-color: #673de6;
+  color: white;
+}

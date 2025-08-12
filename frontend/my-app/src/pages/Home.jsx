@@ -1,7 +1,8 @@
 import React from "react";
 import "./Home.css";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { MoveRight } from "lucide-react";
+import DashBoard from "../assests/DashBoard.png";
 
 const Home = () => {
   const token = localStorage.getItem("token");
@@ -18,19 +19,18 @@ const Home = () => {
             in the world of Software as a Service.
           </p>
 
-          {token && (
-            <div className="hero-buttons">
-              <Link>
-                <button className="btn campaign-btn">Create Campaign</button>
-              </Link>
-              <Link to="/contact">
-                <button className="btn contacts-btn flex items-center gap-2">
-                  <span>Add Contacts</span>
-                  <Plus className="w-4 h-4" />
-                </button>
-              </Link>
-            </div>
-          )}
+          <div className="hero-buttons">
+            <Link to="/dashboard">
+              <button className="btn contacts-btn flex items-center gap-2">
+                <span>Go to DashBoard</span>
+                <MoveRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="hero-image">
+          <img src={DashBoard} alt="Dashboard Preview" />
         </div>
       </section>
     </div>

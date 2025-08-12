@@ -19,3 +19,7 @@ export const deleteContactService = async (ownerUserId, contactId) => {
     owner: ownerUserId,
   });
 };
+
+export const getContactsCount = async (ownerUserId) => {
+  return await Contact.countDocuments({ owner: ownerUserId });
+};
