@@ -128,7 +128,7 @@ function Dashboard() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.info("Campaign moved to in-progress");
+      toast.info("Campaign Started");
       if (statusFilter === "in-progress") {
         fetchCampaigns();
       }
