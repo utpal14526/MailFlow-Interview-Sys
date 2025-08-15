@@ -1,0 +1,28 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - phase-3/Utpal-Raj-deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-d2fhmhmmcj7s73eruuvg?key=${{ secrets.RENDER_API_KEY }}
