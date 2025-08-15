@@ -86,12 +86,11 @@ function Dashboard() {
     recognition.maxAlternatives = 1;
 
     recognition.start();
-    console.log("Start");
+
     setListening(true);
 
     recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
-      console.log("User said:", transcript);
       setListening(false);
 
       try {
