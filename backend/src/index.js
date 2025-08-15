@@ -25,6 +25,9 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+
+// Testing for Ci/Cd
+
 // Protected route feature -- Implemented
 // Mail send feature like gmail   -- Implemented
 // Campaign email sending (new status)
