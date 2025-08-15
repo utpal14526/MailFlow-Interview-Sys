@@ -1,6 +1,7 @@
 import { Campaign } from "../models/Campaign.js";
 import nodemailer from "nodemailer";
 import validator from "validator";
+import { createMailTemplate } from "../common/config/util/mail-template.js";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -33,7 +34,7 @@ export const sendMailInBackground = async (ownerUserId, campaignId) => {
           from: process.env.MAIL,
           to: contact.email,
           subject: campaign.subject,
-          html: campaign.body,
+          html: createMailTemplate(campaign),
         });
       } catch (err) {
         allSent = false;
