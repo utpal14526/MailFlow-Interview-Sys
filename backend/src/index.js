@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import dbConnection from "./common/config/database-connection.js";
 import campaignRoutes from "./routes/campaign.route.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/campaign", campaignRoutes);
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

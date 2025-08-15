@@ -10,6 +10,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import Color from "@tiptap/extension-color";
+import { Mic } from "lucide-react";
 
 function MenuBar({ editor }) {
   if (!editor) return null;
@@ -63,15 +64,58 @@ function Dashboard() {
   const [createCampaign, setCreateCampaign] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [selectedContacts, setSelectedContacts] = useState([]);
+  const [listening, setListening] = useState(false);
 
   const token = localStorage.getItem("token");
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-  // TipTap editor instance
   const editor = useEditor({
     extensions: [StarterKit, TextStyle, Color, Underline],
     content: "",
   });
+
+  function startListening() {
+    if (!("webkitSpeechRecognition" in window)) {
+      toast.error("Speech recognition not supported in this browser");
+      return;
+    }
+
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+    console.log("Start");
+    setListening(true);
+
+    recognition.onresult = async (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("User said:", transcript);
+      setListening(false);
+
+      try {
+        const res = await axios.post(
+          `${BASE_URL}/api/ai/analyzeSpeech`,
+          { transcript },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const { campaignName, subject, body } = res.data?.content;
+        document.querySelector("input[name='name']").value = campaignName;
+        document.querySelector("input[name='subject']").value = subject;
+        editor.commands.setContent(body || "");
+      } catch (err) {
+        toast.error("Failed to process speech");
+      }
+    };
+
+    recognition.onerror = (err) => {
+      console.error(err);
+      toast.error("Speech recognition error");
+      setListening(false);
+    };
+  }
 
   async function fetchStats() {
     try {
@@ -216,9 +260,30 @@ function Dashboard() {
               </h3>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Campaign Name
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Campaign Name
+                  </label>
+                  <button
+                    type="button"
+                    onClick={startListening}
+                    className={`p-2 rounded-full transition-colors duration-200 ${
+                      listening ? "bg-red-100" : "bg-gray-100 hover:bg-gray-200"
+                    } flex items-center gap-1`}
+                    title="Speak your campaign idea"
+                  >
+                    <Mic
+                      className={`w-5 h-5 transition-colors duration-200 ${
+                        listening ? "text-red-500 animate-pulse" : "text-black"
+                      }`}
+                    />
+                    {listening && (
+                      <span className="text-red-500 text-sm font-medium">
+                        Listening...
+                      </span>
+                    )}
+                  </button>
+                </div>
                 <input
                   type="text"
                   name="name"

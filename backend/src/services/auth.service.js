@@ -91,7 +91,7 @@ export const forgotPasswordService = async (email) => {
   const hashedOtp = await bcrypt.hash(rawOtp, 10);
 
   user.resetOtp = hashedOtp;
-  user.resetOtpExpiry = Date.now() + 5 * 60 * 1000;
+  user.resetOtpExpiry = Date.now() + 1 * 60 * 1000;
   await user.save();
 
   const transporter = nodemailer.createTransport({
