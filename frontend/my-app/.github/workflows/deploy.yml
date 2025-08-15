@@ -1,0 +1,35 @@
+name: Deploy Frontend to Railway
+
+on:
+  push:
+    branches:
+      - main  
+      - phase-3/Utpal-Raj-deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: ./frontend/my-app
+
+      - name: Build React App
+        run: npm run build
+        working-directory: ./frontend/my-app
+
+      - name: Deploy to Railway
+        uses: railwayapp/railway-deploy@v2
+        with:
+          serviceId: ${{ secrets.RAILWAY_SERVICE_ID }}
+          apiKey: ${{ secrets.RAILWAY_TOKEN }}
+          rootDir: ./frontend/my-app
