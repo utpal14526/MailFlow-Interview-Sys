@@ -1,9 +1,9 @@
-name: Deploy Frontend to Railway
+name: Frontend CI/CD
 
 on:
   push:
     branches:
-      - main  
+      - main
       - phase-3/Utpal-Raj-deployment
 
 jobs:
@@ -11,25 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+  
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.app/install.sh | sh
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-        working-directory: ./frontend/my-app
 
-      - name: Build React App
-        run: npm run build
-        working-directory: ./frontend/my-app
+      - name: Authenticate with Railway
+        run: railway login --token ${{ secrets.RAILWAY_TOKEN }}
 
-      - name: Deploy to Railway
-        uses: railwayapp/railway-deploy@v2
-        with:
-          serviceId: ${{ secrets.RAILWAY_SERVICE_ID }}
-          apiKey: ${{ secrets.RAILWAY_TOKEN }}
-          rootDir: ./frontend/my-app
+    
+      - name: Deploy Frontend Service
+        working-directory: frontend/my-app
+        run: railway up --service frontend --docker
