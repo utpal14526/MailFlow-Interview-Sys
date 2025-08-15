@@ -26,4 +26,6 @@ jobs:
     
       - name: Deploy Frontend Service
         working-directory: frontend/my-app
+        env:
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
         run: railway up --service frontend --docker
