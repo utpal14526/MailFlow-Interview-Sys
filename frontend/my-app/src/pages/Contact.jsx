@@ -39,7 +39,9 @@ function Contact() {
       setContacts((prev) => [response.data.contact, ...prev]);
       setNewContact({ name: "", email: "" });
     } catch (error) {
-      toast.error("Could not add contact. Please try again.");
+      toast.error(error?.response?.data?.error || "Contact Creation failed", {
+        autoClose: 2000,
+      });
     }
   }
 

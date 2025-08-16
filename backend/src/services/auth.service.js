@@ -25,6 +25,10 @@ export const registerService = async (
     throw new Error("Passwords do not match");
   }
 
+  if (password.length < 6) {
+    throw new Error("Password too short");
+  }
+
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new Error("User already exists");
 

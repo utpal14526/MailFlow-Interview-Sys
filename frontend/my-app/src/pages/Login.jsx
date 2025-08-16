@@ -29,13 +29,13 @@ function Login() {
       if (res && res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
         toast.success(res.data.message || "Login successful!", {
-          autoClose: 3000,
+          autoClose: 2000,
         });
         setTimeout(() => navigate("/"), 1000);
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Login failed", {
-        autoClose: 3000,
+      toast.error(err?.response?.data?.error || "Login failed", {
+        autoClose: 2000,
       });
     }
   }

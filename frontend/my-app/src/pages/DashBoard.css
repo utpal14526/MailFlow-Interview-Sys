@@ -18,3 +18,12 @@
   background-color: #673de6;
   color: white;
 }
+
+.stat-card {
+  @apply rounded-xl shadow-md p-4 flex flex-col items-center justify-center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}

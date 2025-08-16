@@ -2,6 +2,10 @@ import { Campaign } from "../models/Campaign.js";
 import nodemailer from "nodemailer";
 import validator from "validator";
 import { createMailTemplate } from "../utils/mail-template.js";
+import { checkEmailExists } from "../utils/email-exists.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -25,11 +29,16 @@ export const sendMailInBackground = async (ownerUserId, campaignId) => {
     let allSent = true;
 
     for (const contact of campaign.taggedContacts) {
-      if (!validator.isEmail(contact.email)) {
-        allSent = false;
-        break;
-      }
       try {
+        if (!validator.isEmail(contact.email)) {
+          allSent = false;
+          continue;
+        }
+        if (!(await checkEmailExists(contact.email))) {
+          allSent = false;
+          continue;
+        }
+
         await transporter.sendMail({
           from: process.env.MAIL,
           to: contact.email,

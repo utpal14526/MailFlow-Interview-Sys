@@ -10,7 +10,11 @@ export const createCampaignService = async (
   ownerId
 ) => {
   if (!subject || !body || !taggedContacts?.length || !name || !ownerId) {
-    throw new Error("Subject, body, and tagged contacts are required");
+    throw new Error("Name,Subject, body, and tagged contacts are required");
+  }
+
+  if (body.length < 10) {
+    throw new Error("Body Too short");
   }
 
   const campaign = new Campaign({
@@ -74,6 +78,19 @@ export const getDashBoardDataService = async (ownerId) => {
     "email"
   );
   const totalCampaignsCount = campaigns.length;
+
+  const draftCampaignsCount = campaigns.filter(
+    (c) => c.statusOfCampaign === "draft"
+  ).length;
+
+  const inProgressCampaignsCount = campaigns.filter(
+    (c) => c.statusOfCampaign === "in-progress"
+  ).length;
+
+  const failedCampaignsCount = campaigns.filter(
+    (c) => c.statusOfCampaign === "failed"
+  ).length;
+
   const sentCampaignsCount = campaigns.filter(
     (c) => c.statusOfCampaign === "sent"
   ).length;
@@ -83,7 +100,9 @@ export const getDashBoardDataService = async (ownerId) => {
   return {
     totalCampaignsCount,
     sentCampaignsCount,
-    draftCampaignsCount: totalCampaignsCount - sentCampaignsCount,
+    draftCampaignsCount,
+    inProgressCampaignsCount,
+    failedCampaignsCount,
     totalContacts,
   };
 };

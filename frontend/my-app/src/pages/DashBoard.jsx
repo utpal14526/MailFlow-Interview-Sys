@@ -145,7 +145,7 @@ function Dashboard() {
       fetchCampaigns();
       toast.success("Campaign deleted.");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete campaign");
+      toast.error(err?.response?.data?.error || "Failed to delete campaign");
     }
   }
 
@@ -193,13 +193,36 @@ function Dashboard() {
       <ToastContainer />
       <h2 className="text-3xl font-semibold mb-6 text-[#673de6]">Dashboard</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="stat-card">
-          Total Campaigns: {stats.totalCampaignsCount}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="stat-card bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+          <h4 className="text-lg font-semibold">Total Campaigns</h4>
+          <p className="text-2xl">{stats.totalCampaignsCount}</p>
         </div>
-        <div className="stat-card">Sent: {stats.sentCampaignsCount}</div>
-        <div className="stat-card">Draft: {stats.draftCampaignsCount}</div>
-        <div className="stat-card">Total Contacts: {stats.totalContacts}</div>
+
+        <div className="stat-card bg-green-500 text-white">
+          <h4 className="text-lg font-semibold">Sent</h4>
+          <p className="text-2xl">{stats.sentCampaignsCount}</p>
+        </div>
+
+        <div className="stat-card bg-yellow-500 text-white">
+          <h4 className="text-lg font-semibold">Draft</h4>
+          <p className="text-2xl">{stats.draftCampaignsCount}</p>
+        </div>
+
+        <div className="stat-card bg-blue-500 text-white">
+          <h4 className="text-lg font-semibold">In Progress</h4>
+          <p className="text-2xl">{stats.inProgressCampaignsCount}</p>
+        </div>
+
+        <div className="stat-card bg-red-500 text-white">
+          <h4 className="text-lg font-semibold">Failed</h4>
+          <p className="text-2xl">{stats.failedCampaignsCount}</p>
+        </div>
+
+        <div className="stat-card bg-gray-700 text-white">
+          <h4 className="text-lg font-semibold">Total Contacts</h4>
+          <p className="text-2xl">{stats.totalContacts}</p>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">
@@ -249,7 +272,7 @@ function Dashboard() {
                   fetchCampaigns();
                 } catch (err) {
                   toast.error(
-                    err?.response?.data?.message || "Failed to create campaign"
+                    err?.response?.data?.error || "Failed to create campaign"
                   );
                 }
               }}
@@ -401,6 +424,10 @@ function Dashboard() {
               {campaign.taggedContacts.length > 0
                 ? campaign.taggedContacts.map((c) => c.email).join(", ")
                 : "No contacts tagged"}
+            </p>
+
+            <p className="text-sm text-gray-500 mt-1">
+              Created At: {new Date(campaign.createdAt).toLocaleString()}
             </p>
 
             {campaign.statusOfCampaign === "draft" && (
