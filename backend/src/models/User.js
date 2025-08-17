@@ -17,14 +17,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    resetOtp: {
-      type: String,
-    },
-    resetOtpExpiry: {
-      type: Date,
-    },
   },
   { timestamps: true }
 );
 
 export const User = mongoose.model("User", userSchema);
+
+// for a password + new confirm password+ otp   otp verify and then perform this action
+
+//. email -> send otp to your mail set in User Table verify step is needed

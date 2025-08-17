@@ -87,6 +87,7 @@ function Login() {
         email,
         newPassword,
         confirmPassword,
+        otp,
       });
       toast.success("Password reset successfully");
       setStep("login");
@@ -96,7 +97,7 @@ function Login() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to reset password");
+      toast.error(err.response?.data?.error || "Failed to reset password");
     }
   }
 

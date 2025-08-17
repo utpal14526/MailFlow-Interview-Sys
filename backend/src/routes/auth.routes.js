@@ -199,17 +199,21 @@ router.post("/verify-otp", verifyOtp);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, newPassword, confirmPassword]
+ *             required: [email, otp, newPassword, confirmPassword]
  *             properties:
  *               email:
  *                 type: string
  *                 example: user@example.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
  *               newPassword:
  *                 type: string
  *                 example: newPassword123
  *               confirmPassword:
  *                 type: string
  *                 example: newPassword123
+ *
  *     responses:
  *       200:
  *         description: Password reset successful
@@ -225,6 +229,7 @@ router.post("/verify-otp", verifyOtp);
  *                   type: string
  *                   example: Password reset successful. Please log in.
  */
+
 router.post("/reset-password", resetPassword);
 
 /**
