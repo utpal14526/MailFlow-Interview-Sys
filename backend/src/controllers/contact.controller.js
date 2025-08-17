@@ -4,6 +4,7 @@ import {
   deleteContactService,
 } from "../services/contact.service.js";
 
+//  Get all of your Contacts
 export const getAllContacts = async (req, res) => {
   try {
     const contacts = await getContactsService(req.user._id);
@@ -21,6 +22,7 @@ export const getAllContacts = async (req, res) => {
   }
 };
 
+//  Add Contact also check email exists
 export const addContact = async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -47,6 +49,7 @@ export const addContact = async (req, res) => {
   }
 };
 
+//  Delete Contact from your list
 export const deleteContact = async (req, res) => {
   try {
     const contactId = req.params.contactId;
