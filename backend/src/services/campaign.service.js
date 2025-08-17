@@ -55,11 +55,20 @@ export const updateCampaignByIdService = async (
   campaignId,
   updateFields
 ) => {
+  const { subject, body, taggedContacts, name } = updateFields;
+  if (!subject || !body || !taggedContacts?.length || !name) {
+    throw new Error("Name,Subject, body, and tagged contacts are required");
+  }
+
+  if (body.length < 10) {
+    throw new Error("Body Too short");
+  }
   const updated = await Campaign.findOneAndUpdate(
     { _id: campaignId, owner: ownerId },
     { $set: updateFields },
     { new: true }
   );
+  console.log(updated);
   if (!updated) throw new Error("Campaign not found or unauthorized");
   return updated;
 };

@@ -74,9 +74,12 @@ export const getCampaignById = async (req, res) => {
 export const updateCampaignById = async (req, res) => {
   try {
     const campaignId = req.params.campaignId;
+    const updatedFields = req.body;
+
     const updatedCampaign = await updateCampaignByIdService(
       req.user._id,
-      campaignId
+      campaignId,
+      updatedFields
     );
     res.status(201).json({
       campaign: updatedCampaign,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./DashBoard.css";
-import { SquarePen, Plus, Trash, X, Send } from "lucide-react";
+import { SquarePen, Plus, Trash, X, Send, Mic } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,7 +10,6 @@ import StarterKit from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import Color from "@tiptap/extension-color";
-import { Mic } from "lucide-react";
 
 function MenuBar({ editor }) {
   if (!editor) return null;
@@ -57,6 +56,8 @@ function Dashboard() {
     totalCampaignsCount: 0,
     sentCampaignsCount: 0,
     draftCampaignsCount: 0,
+    inProgressCampaignsCount: 0,
+    failedCampaignsCount: 0,
     totalContacts: 0,
   });
   const [campaigns, setCampaigns] = useState([]);
@@ -65,6 +66,7 @@ function Dashboard() {
   const [contacts, setContacts] = useState([]);
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [listening, setListening] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
 
   const token = localStorage.getItem("token");
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -86,7 +88,6 @@ function Dashboard() {
     recognition.maxAlternatives = 1;
 
     recognition.start();
-
     setListening(true);
 
     recognition.onresult = async (event) => {
@@ -121,7 +122,7 @@ function Dashboard() {
       const res = await axios.get(`${BASE_URL}/api/campaign/getDashBoardData`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setStats(res && res.data && res.data.stats ? res.data.stats : stats);
+      setStats(res?.data?.stats || stats);
     } catch (error) {}
   }
 
@@ -131,9 +132,7 @@ function Dashboard() {
         `${BASE_URL}/api/campaign?status=${statusFilter}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCampaigns(
-        res && res.data && res.data.campaigns ? res.data.campaigns : []
-      );
+      setCampaigns(res?.data?.campaigns || []);
     } catch (error) {}
   }
 
@@ -154,9 +153,7 @@ function Dashboard() {
       const res = await axios.get(`${BASE_URL}/api/contact`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setContacts(
-        res && res.data && res.data.contacts ? res.data.contacts : []
-      );
+      setContacts(res?.data?.contacts || []);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to fetch contacts");
       setContacts([]);
@@ -198,27 +195,22 @@ function Dashboard() {
           <h4 className="text-lg font-semibold">Total Campaigns</h4>
           <p className="text-2xl">{stats.totalCampaignsCount}</p>
         </div>
-
         <div className="stat-card bg-green-500 text-white">
           <h4 className="text-lg font-semibold">Sent</h4>
           <p className="text-2xl">{stats.sentCampaignsCount}</p>
         </div>
-
         <div className="stat-card bg-yellow-500 text-white">
           <h4 className="text-lg font-semibold">Draft</h4>
           <p className="text-2xl">{stats.draftCampaignsCount}</p>
         </div>
-
         <div className="stat-card bg-blue-500 text-white">
           <h4 className="text-lg font-semibold">In Progress</h4>
           <p className="text-2xl">{stats.inProgressCampaignsCount}</p>
         </div>
-
         <div className="stat-card bg-red-500 text-white">
           <h4 className="text-lg font-semibold">Failed</h4>
           <p className="text-2xl">{stats.failedCampaignsCount}</p>
         </div>
-
         <div className="stat-card bg-gray-700 text-white">
           <h4 className="text-lg font-semibold">Total Contacts</h4>
           <p className="text-2xl">{stats.totalContacts}</p>
@@ -237,7 +229,12 @@ function Dashboard() {
         ))}
         <button
           className="btn contacts-btn flex items-center gap-2"
-          onClick={() => setCreateCampaign(!createCampaign)}
+          onClick={() => {
+            setCreateCampaign(true);
+            setEditingCampaign(null);
+            editor.commands.clearContent();
+            setSelectedContacts([]);
+          }}
         >
           <span>Create Campaign</span>
           <Plus className="w-4 h-4" />
@@ -249,7 +246,11 @@ function Dashboard() {
           <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-black"
-              onClick={() => setCreateCampaign(false)}
+              onClick={() => {
+                setCreateCampaign(false);
+                setEditingCampaign(null);
+                editor.commands.clearContent();
+              }}
             >
               <X />
             </button>
@@ -262,23 +263,34 @@ function Dashboard() {
                 const body = editor.getHTML();
 
                 try {
-                  await axios.post(
-                    `${BASE_URL}/api/campaign`,
-                    { subject, body, name, taggedContacts: selectedContacts },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
-                  toast.success("Campaign created.");
+                  if (editingCampaign) {
+                    await axios.patch(
+                      `${BASE_URL}/api/campaign/${editingCampaign._id}`,
+                      { subject, body, name, taggedContacts: selectedContacts },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    toast.success("Campaign updated.");
+                  } else {
+                    await axios.post(
+                      `${BASE_URL}/api/campaign`,
+                      { subject, body, name, taggedContacts: selectedContacts },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    toast.success("Campaign created.");
+                  }
+
                   setCreateCampaign(false);
+                  setEditingCampaign(null);
                   fetchCampaigns();
                 } catch (err) {
                   toast.error(
-                    err?.response?.data?.error || "Failed to create campaign"
+                    err?.response?.data?.error || "Failed to save campaign"
                   );
                 }
               }}
             >
               <h3 className="text-lg font-semibold mb-4 text-[#673de6]">
-                Create New Campaign
+                {editingCampaign ? "Edit Campaign" : "Create New Campaign"}
               </h3>
 
               <div className="mb-4">
@@ -286,29 +298,36 @@ function Dashboard() {
                   <label className="block text-sm font-medium text-gray-700">
                     Campaign Name
                   </label>
-                  <button
-                    type="button"
-                    onClick={startListening}
-                    className={`p-2 rounded-full transition-colors duration-200 ${
-                      listening ? "bg-red-100" : "bg-gray-100 hover:bg-gray-200"
-                    } flex items-center gap-1`}
-                    title="Speak your campaign idea"
-                  >
-                    <Mic
-                      className={`w-5 h-5 transition-colors duration-200 ${
-                        listening ? "text-red-500 animate-pulse" : "text-black"
-                      }`}
-                    />
-                    {listening && (
-                      <span className="text-red-500 text-sm font-medium">
-                        Listening...
-                      </span>
-                    )}
-                  </button>
+                  {!editingCampaign && (
+                    <button
+                      type="button"
+                      onClick={startListening}
+                      className={`p-2 rounded-full transition-colors duration-200 ${
+                        listening
+                          ? "bg-red-100"
+                          : "bg-gray-100 hover:bg-gray-200"
+                      } flex items-center gap-1`}
+                      title="Speak your campaign idea"
+                    >
+                      <Mic
+                        className={`w-5 h-5 transition-colors duration-200 ${
+                          listening
+                            ? "text-red-500 animate-pulse"
+                            : "text-black"
+                        }`}
+                      />
+                      {listening && (
+                        <span className="text-red-500 text-sm font-medium">
+                          Listening...
+                        </span>
+                      )}
+                    </button>
+                  )}
                 </div>
                 <input
                   type="text"
                   name="name"
+                  defaultValue={editingCampaign ? editingCampaign.name : ""}
                   required
                   className="mt-1 p-2 w-full border rounded-md"
                 />
@@ -321,6 +340,7 @@ function Dashboard() {
                 <input
                   type="text"
                   name="subject"
+                  defaultValue={editingCampaign ? editingCampaign.subject : ""}
                   required
                   className="mt-1 p-2 w-full border rounded-md"
                 />
@@ -352,9 +372,7 @@ function Dashboard() {
                     }
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedContacts(
-                          contacts.map((contact) => contact._id)
-                        );
+                        setSelectedContacts(contacts.map((c) => c._id));
                       } else {
                         setSelectedContacts([]);
                       }
@@ -399,7 +417,7 @@ function Dashboard() {
                 type="submit"
                 className="btn bg-[#673de6] text-white rounded-md w-full"
               >
-                Save Campaign
+                {editingCampaign ? "Update Campaign" : "Save Campaign"}
               </button>
             </form>
           </div>
@@ -425,7 +443,6 @@ function Dashboard() {
                 ? campaign.taggedContacts.map((c) => c.email).join(", ")
                 : "No contacts tagged"}
             </p>
-
             <p className="text-sm text-gray-500 mt-1">
               Created At: {new Date(campaign.createdAt).toLocaleString()}
             </p>
@@ -434,14 +451,21 @@ function Dashboard() {
               <div className="flex gap-3 mt-3">
                 <SquarePen
                   style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    (window.location.href = `/update-campaign/${campaign._id}`)
-                  }
+                  onClick={() => {
+                    setEditingCampaign(campaign);
+                    setCreateCampaign(true);
+                    editor.commands.setContent(campaign.body || "");
+                    setSelectedContacts(
+                      campaign.taggedContacts.map((c) => c._id)
+                    );
+                  }}
                 />
+
                 <Trash
                   style={{ cursor: "pointer" }}
                   onClick={() => handleDelete(campaign._id)}
                 />
+
                 <Send
                   style={{ cursor: "pointer" }}
                   onClick={() => handleSendCampaign(campaign._id)}
