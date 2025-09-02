@@ -1,19 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const [user, setUser] = useState(null);
 
   function handleLogout() {
     localStorage.removeItem("token");
     navigate("/login");
   }
 
+  useEffect(() => {
+    if (token) {
+      const userData = JSON.parse(localStorage.getItem("user"));
+      setUser(userData);
+    }
+  }, [token]);
+
   return (
     <nav className="w-full flex flex-wrap justify-between items-center px-6 py-4 shadow-md bg-[#0D0620] text-white">
-    
       <Link to="/" className="text-xl sm:text-2xl font-bold text-white">
         MailFlow{" "}
         <span className="text-sm sm:text-base font-light">
@@ -21,7 +28,6 @@ function Navbar() {
         </span>
       </Link>
 
-      {/* Buttons */}
       <div className="flex items-center space-x-2 sm:space-x-4 mt-3 sm:mt-0">
         {!token ? (
           <>
@@ -40,12 +46,26 @@ function Navbar() {
           </>
         ) : (
           <>
+            <p className="text-sm sm:text-base font-semibold">
+              Welcome, {localStorage.getItem("name") || "User"}!
+            </p>
             <Link to="/contact">
               <button className="px-4 sm:px-5 py-2 flex items-center gap-2 rounded-lg font-semibold shadow-sm bg-blue-500 hover:bg-blue-600 transition-all duration-200">
                 <span>Add Contacts</span>
                 <Plus className="w-4 h-4" />
               </button>
             </Link>
+
+            <button
+              onClick={() => {
+                window.location.href = `http://localhost:5002/api/auth/google?token=${localStorage.getItem(
+                  "token"
+                )}`;
+              }}
+              className="px-4 sm:px-5 py-2 rounded-lg font-semibold shadow-sm bg-green-500 text-white hover:bg-green-600 transition-all duration-200"
+            >
+              Connect with Google
+            </button>
             <button
               onClick={handleLogout}
               className="px-4 sm:px-5 py-2 rounded-lg font-semibold shadow-sm bg-red-600 text-white hover:bg-red-700 transition-all duration-200"

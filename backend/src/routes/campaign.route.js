@@ -7,10 +7,14 @@ import {
   deleteCampaignById,
   getDashBoardData,
   startSendCampaign,
+  createAndSendCampaignBySheet,
 } from "../controllers/campaign.controller.js";
+import multer from "multer";
+import * as XLSX from "xlsx";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
+const upload = multer({ dest: "uploads/" });
 
 /**
  * @swagger
@@ -237,5 +241,11 @@ router.patch("/:campaignId", authenticate, updateCampaignById);
  *         description: Campaign deleted
  */
 router.delete("/:campaignId", authenticate, deleteCampaignById);
+
+router.post(
+  "/send/campaign/upload-sheet",
+  upload.single("file"),
+  createAndSendCampaignBySheet
+);
 
 export default router;

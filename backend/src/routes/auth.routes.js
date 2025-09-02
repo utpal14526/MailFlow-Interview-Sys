@@ -6,8 +6,12 @@ import {
   verifyOtp,
   resetPassword,
   verifyUser,
+  googleAuth,
+  googleCallback,
+  findUserInfo,
 } from "../controllers/auth.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import { authenticateOAuth } from "../middleware/OAuth.middleware.js";
 
 const router = Router();
 
@@ -256,5 +260,9 @@ router.post("/reset-password", resetPassword);
  *                   example: User verified successfully
  */
 router.post("/verify-user", authenticate, verifyUser);
+
+router.get("/google", authenticateOAuth, googleAuth); // start Google login
+router.get("/google/callback", googleCallback); // handle redirect
+router.get("/user-info", authenticate, findUserInfo); // handle redirect
 
 export default router;

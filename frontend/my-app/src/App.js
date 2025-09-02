@@ -9,6 +9,7 @@ import Contact from "./pages/Contact";
 import DashBoard from "./pages/DashBoard";
 import ProtectedRoute from "./ProtectedRoute/ProtectedRoute.js";
 import Footer from "./components/Footer";
+import Plans from "./pages/Plans";
 
 function App() {
   return (
@@ -24,6 +25,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Contact />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plans"
+          element={
+            <ProtectedRoute>
+              <Plans />
             </ProtectedRoute>
           }
         />

@@ -20,7 +20,12 @@ const campaignSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Contact",
-        required: true,
+      },
+    ],
+    uploadedEmails: [
+      {
+        name: { type: String },
+        email: { type: String, required: true },
       },
     ],
     statusOfCampaign: {
@@ -30,8 +35,19 @@ const campaignSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true,
     },
+    sendLogs: [
+      {
+        contact: { type: mongoose.Schema.Types.ObjectId, ref: "Contact" },
+        email: String,
+        status: {
+          type: String,
+          enum: ["success", "failed", "in-progress"],
+          default: "failed",
+        },
+        reason: String,
+      },
+    ],
   },
   { timestamps: true }
 );

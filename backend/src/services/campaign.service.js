@@ -1,5 +1,6 @@
 import { Campaign } from "../models/Campaign.js";
 import { getContactsCount } from "./contact.service.js";
+import { User } from "../models/User.js";
 import { sendMailInBackground } from "./sendMail.service.js";
 
 export const createCampaignService = async (
@@ -68,7 +69,7 @@ export const updateCampaignByIdService = async (
     { $set: updateFields },
     { new: true }
   );
-  console.log(updated);
+
   if (!updated) throw new Error("Campaign not found or unauthorized");
   return updated;
 };
@@ -117,10 +118,31 @@ export const getDashBoardDataService = async (ownerId) => {
 };
 
 export const startSendCampaignService = async (ownerUserId, campaignId) => {
+  const user = await User.findById(ownerUserId).select("-password");
+  if (user.emailCredits <= 0) {
+    throw new Error("Insufficient email credits!  Please Bug Email Credits");
+  }
+
+  const campaign = await Campaign.findOne({
+    _id: campaignId,
+    owner: ownerUserId,
+  });
+
+  if (!campaign || campaign.taggedContacts.length === 0) {
+    await Campaign.findByIdAndUpdate(campaignId, {
+      statusOfCampaign: "failed",
+    });
+    return;
+  }
+
+  if (campaign.taggedContacts.length > user.emailCredits) {
+    throw new Error("Insufficient email credits! Please Bug Email Credits");
+  }
+
   await Campaign.findOneAndUpdate(
     { _id: campaignId, owner: ownerUserId, statusOfCampaign: "draft" },
     { statusOfCampaign: "in-progress" }
   );
 
-  sendMailInBackground(ownerUserId, campaignId);
+  sendMailInBackground(ownerUserId, campaign);
 };

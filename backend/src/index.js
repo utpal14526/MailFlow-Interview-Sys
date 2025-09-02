@@ -7,6 +7,7 @@ import dbConnection from "./common/config/database-connection.js";
 import campaignRoutes from "./routes/campaign.route.js";
 import aiRoutes from "./routes/ai.routes.js";
 import { swaggerUi, swaggerSpec } from "../swagger.js";
+import paymentRoutes from "./routes/payment.route.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/campaign", campaignRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/payment", paymentRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

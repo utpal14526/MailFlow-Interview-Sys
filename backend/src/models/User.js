@@ -17,6 +17,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    accessToken: {
+      type: String,
+    },
+    refreshToken: {
+      type: String,
+    },
+    tokenExpiry: {
+      type: Date,
+    },
+    emailCredits: {
+      type: Number,
+      default: 20,
+    },
   },
   { timestamps: true }
 );

@@ -67,6 +67,10 @@ function Dashboard() {
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [listening, setListening] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
+  const [emailCredits, setEmailCredits] = useState(0);
+  const [reportCampaign, setReportCampaign] = useState(null);
+  const [useSheet, setUseSheet] = useState(false);
+  const [sheetFile, setSheetFile] = useState(null);
 
   const token = localStorage.getItem("token");
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -160,6 +164,18 @@ function Dashboard() {
     }
   }
 
+  async function fetchUserInfo() {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/auth/user-info`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEmailCredits(res?.data?.user?.emailCredits || 0);
+    } catch (err) {
+      console.error("Failed to fetch user info:", err);
+      toast.error("Failed to fetch email credits");
+    }
+  }
+
   async function handleSendCampaign(campaignId) {
     setCampaigns((prev) => prev.filter((c) => c._id !== campaignId));
     try {
@@ -175,6 +191,7 @@ function Dashboard() {
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to start sending");
       fetchCampaigns();
+      fetchUserInfo();
     }
   }
 
@@ -182,6 +199,7 @@ function Dashboard() {
     fetchStats();
     fetchCampaigns();
     fetchContacts();
+    fetchUserInfo();
     // eslint-disable-next-line
   }, [statusFilter]);
 
@@ -189,6 +207,18 @@ function Dashboard() {
     <div className="dashboard-container bg-[#f9f9fc] min-h-screen px-8 py-6">
       <ToastContainer />
       <h2 className="text-3xl font-semibold mb-6 text-[#673de6]">Dashboard</h2>
+      <div className="flex items-center justify-between bg-white p-4 rounded-md shadow-md mb-6">
+        <div>
+          <h4 className="text-lg font-semibold">Email Credits</h4>
+          <p className="text-2xl">{emailCredits}</p>
+        </div>
+        <button
+          onClick={() => (window.location.href = "/plans")}
+          className="btn bg-[#673de6] text-white rounded-md px-4 py-2"
+        >
+          Buy Credits
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <div className="stat-card bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
@@ -263,20 +293,52 @@ function Dashboard() {
                 const body = editor.getHTML();
 
                 try {
-                  if (editingCampaign) {
-                    await axios.patch(
-                      `${BASE_URL}/api/campaign/${editingCampaign._id}`,
-                      { subject, body, name, taggedContacts: selectedContacts },
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    toast.success("Campaign updated.");
-                  } else {
+                  if (useSheet) {
+                    // ✅ Upload sheet endpoint
+                    const formData = new FormData();
+                    formData.append("file", sheetFile);
+                    formData.append("name", name);
+                    formData.append("subject", subject);
+                    formData.append("body", body);
+
                     await axios.post(
-                      `${BASE_URL}/api/campaign`,
-                      { subject, body, name, taggedContacts: selectedContacts },
-                      { headers: { Authorization: `Bearer ${token}` } }
+                      `${BASE_URL}/api/campaign/send/campaign/upload-sheet`,
+                      formData,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "multipart/form-data",
+                        },
+                      }
                     );
-                    toast.success("Campaign created.");
+                    toast.success("Campaign created via sheet upload.");
+                  } else {
+                    // ✅ Manual contacts
+                    if (editingCampaign) {
+                      await axios.patch(
+                        `${BASE_URL}/api/campaign/${editingCampaign._id}`,
+                        {
+                          subject,
+                          body,
+                          name,
+                          taggedContacts: selectedContacts,
+                        },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      toast.success("Campaign updated.");
+                    } else {
+                      await axios.post(
+                        `${BASE_URL}/api/campaign`,
+                        {
+                          subject,
+                          body,
+                          name,
+                          taggedContacts: selectedContacts,
+                        },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      toast.success("Campaign created.");
+                    }
                   }
 
                   setCreateCampaign(false);
@@ -359,59 +421,80 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Contacts
-                </label>
-                <div className="flex items-center space-x-2 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedContacts.length === contacts.length &&
-                      contacts.length > 0
-                    }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedContacts(contacts.map((c) => c._id));
-                      } else {
-                        setSelectedContacts([]);
+              {!useSheet ? (
+                // ✅ Manual contacts selection (your current UI)
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Contacts
+                  </label>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedContacts.length === contacts.length &&
+                        contacts.length > 0
                       }
-                    }}
-                  />
-                  <span className="text-gray-700">Select All</span>
-                </div>
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedContacts(contacts.map((c) => c._id));
+                        } else {
+                          setSelectedContacts([]);
+                        }
+                      }}
+                    />
+                    <span className="text-gray-700">Select All</span>
+                  </div>
 
-                <div className="h-40 overflow-y-auto border rounded-md p-2">
-                  {contacts.length === 0 && (
-                    <p className="text-gray-500">No contacts available</p>
-                  )}
-                  {contacts.map((contact) => (
-                    <label
-                      key={contact._id}
-                      className="flex items-center space-x-2 mb-1"
-                    >
-                      <input
-                        type="checkbox"
-                        value={contact._id}
-                        checked={selectedContacts.includes(contact._id)}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (e.target.checked) {
-                            setSelectedContacts([...selectedContacts, value]);
-                          } else {
-                            setSelectedContacts(
-                              selectedContacts.filter((id) => id !== value)
-                            );
-                          }
-                        }}
-                      />
-                      <span>
-                        {contact.name} ({contact.email})
-                      </span>
-                    </label>
-                  ))}
+                  <div className="h-40 overflow-y-auto border rounded-md p-2">
+                    {contacts.length === 0 && (
+                      <p className="text-gray-500">No contacts available</p>
+                    )}
+                    {contacts.map((contact) => (
+                      <label
+                        key={contact._id}
+                        className="flex items-center space-x-2 mb-1"
+                      >
+                        <input
+                          type="checkbox"
+                          value={contact._id}
+                          checked={selectedContacts.includes(contact._id)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (e.target.checked) {
+                              setSelectedContacts([...selectedContacts, value]);
+                            } else {
+                              setSelectedContacts(
+                                selectedContacts.filter((id) => id !== value)
+                              );
+                            }
+                          }}
+                        />
+                        <span>
+                          {contact.name} ({contact.email})
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                // ✅ Sheet upload
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Google Sheet (.xlsx, .csv)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setSheetFile(e.target.files[0])}
+                    className="mt-1 p-2 w-full border rounded-md"
+                  />
+                  {sheetFile && (
+                    <p className="text-sm mt-1 text-green-600">
+                      {sheetFile.name} selected
+                    </p>
+                  )}
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -420,6 +503,34 @@ function Dashboard() {
                 {editingCampaign ? "Update Campaign" : "Save Campaign"}
               </button>
             </form>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Campaign Audience
+              </label>
+
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="audienceType"
+                    value="manual"
+                    defaultChecked
+                    onChange={() => setUseSheet(false)}
+                  />
+                  Select Contacts
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="audienceType"
+                    value="sheet"
+                    onChange={() => setUseSheet(true)}
+                  />
+                  Upload Google Sheet
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -444,8 +555,17 @@ function Dashboard() {
                 : "No contacts tagged"}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              Created At: {new Date(campaign.createdAt).toLocaleString()}
+              Created At: {new Date(campaign.createdAt).toDateString()}
             </p>
+
+            {["failed", "sent"].includes(campaign.statusOfCampaign) && (
+              <button
+                className="mt-2 text-sm text-blue-600 underline"
+                onClick={() => setReportCampaign(campaign)}
+              >
+                View Report
+              </button>
+            )}
 
             {campaign.statusOfCampaign === "draft" && (
               <div className="flex gap-3 mt-3">
@@ -475,6 +595,59 @@ function Dashboard() {
           </div>
         ))}
       </div>
+
+      {reportCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg relative max-h-[80vh] overflow-y-auto">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-black"
+              onClick={() => setReportCampaign(null)}
+            >
+              <X />
+            </button>
+
+            <h3 className="text-lg font-semibold mb-4 text-[#673de6]">
+              Campaign Report - {reportCampaign.name}
+            </h3>
+            <p className="text-sm text-gray-600 mb-2">
+              Status: {reportCampaign.statusOfCampaign}
+            </p>
+
+            <div className="space-y-2">
+              {reportCampaign.sendLogs && reportCampaign.sendLogs.length > 0 ? (
+                reportCampaign.sendLogs.map((log, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-md shadow-sm ${
+                      log.status === "success"
+                        ? "bg-green-50 border border-green-300"
+                        : "bg-red-50 border border-red-300"
+                    }`}
+                  >
+                    <p className="font-medium">
+                      {log.email}{" "}
+                      <span
+                        className={`ml-2 text-xs px-2 py-1 rounded ${
+                          log.status === "success"
+                            ? "bg-green-200 text-green-800"
+                            : "bg-red-200 text-red-800"
+                        }`}
+                      >
+                        {log.status}
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Reason: {log.reason}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No logs available</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
